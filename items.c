@@ -253,11 +253,12 @@ item *do_item_alloc(char *key, const size_t nkey, const unsigned int flags,
     if (nbytes < 2)
         return 0;
 
+    printf("EMPIKAAAAAAAA\n");
     size_t ntotal = item_make_header(nkey + 1, flags, nbytes, suffix, &nsuffix);
     if (settings.use_cas) {
         ntotal += sizeof(uint64_t);
     }
-
+    printf("EMPIKAAAAAAAA\n");
     unsigned int id = slabs_clsid(ntotal);
     unsigned int hdr_id = 0;
     if (id == 0)
@@ -266,6 +267,7 @@ item *do_item_alloc(char *key, const size_t nkey, const unsigned int flags,
     /* This is a large item. Allocate a header object now, lazily allocate
      *  chunks while reading the upload.
      */
+    printf("EMPIKAAAAAAAA\n");
     if (ntotal > settings.slab_chunk_size_max) {
         /* We still link this item into the LRU for the larger slab class, but
          * we're pulling a header from an entirely different slab class. The
@@ -282,6 +284,7 @@ item *do_item_alloc(char *key, const size_t nkey, const unsigned int flags,
             htotal += 8 - remain;
         }
 #endif
+        
         hdr_id = slabs_clsid(htotal);
         it = do_item_alloc_pull(htotal, hdr_id);
         /* setting ITEM_CHUNKED is fine here because we aren't LINKED yet. */
@@ -289,6 +292,7 @@ item *do_item_alloc(char *key, const size_t nkey, const unsigned int flags,
             it->it_flags |= ITEM_CHUNKED;
     } else {
         it = do_item_alloc_pull(ntotal, id);
+        printf("EMPIKAAAAAAAA\n");
     }
 
     if (it == NULL) {

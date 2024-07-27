@@ -4580,6 +4580,34 @@ static int _mc_meta_load_cb(const char *tag, void *ctx, void *data) {
     return reuse_mmap;
 }
 
+//*** ADD BY GEORGIA: initialize dummy item ***//
+
+item* initialize_dummy_item(char* key, char* value) {
+    
+    // Key and value lengths
+    size_t nkey = strlen(key);
+    size_t nvalue = strlen(value);
+
+    // Allocate memory for the item
+    item* it = item_alloc(key, nkey, 0, 0, nvalue + 2); // +2 for \r\n
+    if (it == NULL) {
+        fprintf(stderr, "Failed to allocate memory for item\n");
+        return NULL;
+    }
+
+    // Set the item's value
+    memcpy(ITEM_data(it), value, nvalue);
+    ITEM_data(it)[nvalue] = '\r';
+    ITEM_data(it)[nvalue + 1] = '\n';
+
+    // Set the item's size
+    it->nbytes = nvalue + 2;
+
+    return it;
+}
+
+
+
 int main (int argc, char **argv) {
     int c;
     bool lock_memory = false;
@@ -4738,6 +4766,7 @@ int main (int argc, char **argv) {
     /* init settings */
     settings_init();
     verify_default("hash_algorithm", hash_type == MURMUR3_HASH);
+
 #ifdef EXTSTORE
     void *storage = NULL;
     void *storage_cf = storage_init_config(&settings);
@@ -4790,6 +4819,8 @@ int main (int argc, char **argv) {
           "e:"  /* mmap path for external item memory */
           "o:"  /* Extended generic options */
           "N:"  /* NAPI ID based thread selection */
+          //*** ADD BY GEORGIA: option O to specify the sleep time for memcached ***//
+          "O:" /* Sleep time that represents the processing time of memcached */  
           ;
 
     /* process arguments */
@@ -5484,11 +5515,21 @@ int main (int argc, char **argv) {
             } // while
             free(subopts_orig);
             break;
+        //*** ADD BY GEORGIA: to process option sl added for sleep command ***//
+        case 'O':
+            settings.sleep_time = atoi(optarg);
+            break;
         default:
             fprintf(stderr, "Illegal argument \"%c\"\n", c);
             return 1;
         }
     }
+
+    //*** ADD BY GEORGIA: initialize dummy item ***//
+    char* dummy_key = "dummy_key";
+    char* dummy_value = "dummy_value";
+
+    dummy_item = initialize_dummy_item(dummy_key, dummy_value);
 
     if (settings.num_napi_ids > settings.num_threads) {
         fprintf(stderr, "Number of napi_ids(%d) cannot be greater than number of threads(%d)\n",

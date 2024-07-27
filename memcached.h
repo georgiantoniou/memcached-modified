@@ -501,6 +501,9 @@ struct settings {
 #endif
     int num_napi_ids;   /* maximum number of NAPI IDs */
     char *memory_file;  /* warm restart memory file path */
+
+    //*** ADD BY GEORGIA: sleep time parameter ***//
+    int sleep_time;
 };
 
 extern struct stats stats;
@@ -561,6 +564,10 @@ typedef struct _stritem {
     /* then " flags length\r\n" (no terminating null) */
     /* then data with terminating \r\n (no terminating null; it's binary!) */
 } item;
+
+//*** ADD BY GEORGIA: dummy item to return to get requests ***//
+
+item *dummy_item;
 
 // TODO: If we eventually want user loaded modules, we can't use an enum :(
 enum crawler_run_type {
@@ -866,6 +873,10 @@ extern void *ext_storage;
 /*
  * Functions
  */
+
+//*** ADD BY GEORGIA: initialize dummy item ***//
+item *initialize_dummy_item(char* key, char* value);
+
 void do_accept_new_conns(const bool do_accept);
 enum delta_result_type do_add_delta(conn *c, const char *key,
                                     const size_t nkey, const bool incr,

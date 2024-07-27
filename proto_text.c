@@ -14,6 +14,9 @@
 #include <string.h>
 #include <stdlib.h>
 
+//*** ADD BY GEORGIA: necessary library for busy wait ***//
+#include <time.h>
+
 #define META_SPACE(p) { \
     *p = ' '; \
     p++; \
@@ -535,6 +538,26 @@ static inline int make_ascii_get_suffix(char *suffix, item *it, bool return_cas,
     return (p - suffix) + 2;
 }
 
+
+//*** ADD BY GEORGIA: busy wait instead of searching ***//
+void busy_wait_microseconds(long microseconds) {
+    struct timespec start_time, current_time;
+    long current_time_microseconds; 
+
+    // Get the current time
+    clock_gettime(CLOCK_MONOTONIC, &start_time);
+    
+    // Calculate the end time
+    long end_time = start_time.tv_sec * 1000000 + start_time.tv_nsec / 1000 + microseconds;
+
+    do {
+        clock_gettime(CLOCK_MONOTONIC, &current_time);
+        current_time_microseconds = current_time.tv_sec * 1000000 + current_time.tv_nsec / 1000;
+    } while (current_time_microseconds < end_time);
+}
+
+
+
 /* ntokens is overwritten here... shrug.. */
 static inline void process_get_command(conn *c, token_t *tokens, size_t ntokens, bool return_cas, bool should_touch) {
     char *key;
@@ -542,7 +565,10 @@ static inline void process_get_command(conn *c, token_t *tokens, size_t ntokens,
     item *it;
     token_t *key_token = &tokens[KEY_TOKEN];
     int32_t exptime_int = 0;
-    rel_time_t exptime = 0;
+    
+    //*** REMOVE BY GEORGIA: remove search to enable constant search time ***//
+    // rel_time_t exptime = 0;
+    
     bool fail_length = false;
     assert(c != NULL);
     mc_resp *resp = c->resp;
@@ -554,12 +580,16 @@ static inline void process_get_command(conn *c, token_t *tokens, size_t ntokens,
             return;
         }
         key_token++;
-        exptime = realtime(EXPTIME_TO_POSITIVE_TIME(exptime_int));
+
+        //*** REMOVE BY GEORGIA: initialize response to dummy item ***//        
+        // exptime = realtime(EXPTIME_TO_POSITIVE_TIME(exptime_int));
     }
 
     do {
         while(key_token->length != 0) {
-            bool overflow; // not used here.
+            //*** REMOVE BY GEORGIA: remove search to enable constant search time ***//
+            // bool overflow; // not used here.
+
             key = key_token->value;
             nkey = key_token->length;
 
@@ -568,7 +598,15 @@ static inline void process_get_command(conn *c, token_t *tokens, size_t ntokens,
                 goto stop;
             }
 
-            it = limited_get(key, nkey, c, exptime, should_touch, DO_UPDATE, &overflow);
+            //*** REMOVE BY GEORGIA: remove search to enable constant search time ***//
+            // it = limited_get(key, nkey, c, exptime, should_touch, DO_UPDATE, &overflow);
+            
+            //*** ADD BY GEORGIA: initialize response to dummy item ***//
+            it = dummy_item;
+
+            //*** ADD BY GEORGIA: spin sleep for a fixed amount of time ***//
+            busy_wait_microseconds(settings.sleep_time);  
+
             if (settings.detail_enabled) {
                 stats_prefix_record_get(key, nkey, NULL != it);
             }
