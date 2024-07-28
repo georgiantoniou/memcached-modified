@@ -173,6 +173,7 @@ static size_t item_make_header(const uint8_t nkey, const unsigned int flags, con
 }
 
 item *do_item_alloc_pull(const size_t ntotal, const unsigned int id) {
+    printf("EMPIKAAAAAAAAAAAAAAAAAAAAAAAA\n");
     item *it = NULL;
     int i;
     /* If no memory is available, attempt a direct LRU juggle/eviction */
@@ -186,9 +187,12 @@ item *do_item_alloc_pull(const size_t ntotal, const unsigned int id) {
         if (!settings.lru_segmented) {
             lru_pull_tail(id, COLD_LRU, 0, 0, 0, NULL);
         }
+        printf("%u\n", id);
+        printf("%zu\n", ntotal);
         it = slabs_alloc(ntotal, id, 0);
-
+        printf("EMPIKAAAAAAAAAAAAAAAAAAAAAAAA\n");
         if (it == NULL) {
+            printf("EMPIKAAAAAAAAAAAAAAAAAAAAAAAAnulllllll\n");
             // We send '0' in for "total_bytes" as this routine is always
             // pulling to evict, or forcing HOT -> COLD migration.
             // As of this writing, total_bytes isn't at all used with COLD_LRU.

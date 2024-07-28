@@ -408,8 +408,11 @@ static void *do_slabs_alloc(const size_t size, unsigned int id,
     slabclass_t *p;
     void *ret = NULL;
     item *it = NULL;
-
+    printf("%d\n", POWER_SMALLEST);
+    printf("%d\n", power_largest);
+    printf("%u\n", id);
     if (id < POWER_SMALLEST || id > power_largest) {
+        printf("EMPIKAAA sto null tou do slabs aloc\n");
         MEMCACHED_SLABS_ALLOCATE_FAILED(size, 0);
         return NULL;
     }

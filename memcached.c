@@ -5525,12 +5525,6 @@ int main (int argc, char **argv) {
         }
     }
 
-    //*** ADD BY GEORGIA: initialize dummy item ***//
-    char* dummy_key = "dummy_key";
-    char* dummy_value = "dummy_value";
-
-    dummy_item = initialize_dummy_item(dummy_key, dummy_value);
-
     if (settings.num_napi_ids > settings.num_threads) {
         fprintf(stderr, "Number of napi_ids(%d) cannot be greater than number of threads(%d)\n",
                 settings.num_napi_ids, settings.num_threads);
@@ -6052,6 +6046,12 @@ int main (int argc, char **argv) {
     if (settings.drop_privileges) {
         drop_privileges();
     }
+
+    //*** ADD BY GEORGIA: initialize dummy item ***//
+    char* dummy_key = "dummy_key";
+    char* dummy_value = "dummy_value";
+
+    dummy_item = initialize_dummy_item(dummy_key, dummy_value);
 
     /* Initialize the uriencode lookup table. */
     uriencode_init();
