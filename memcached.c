@@ -6047,11 +6047,11 @@ int main (int argc, char **argv) {
         drop_privileges();
     }
 
-    //*** ADD BY GEORGIA: initialize dummy item ***//
-    char* dummy_key = "dummy_key";
-    char* dummy_value = "dummy_value";
+    // //*** ADD BY GEORGIA: initialize dummy item ***//
+    // char* dummy_key = "dummy_key";
+    // char* dummy_value = "dummy_value";
 
-    dummy_item = initialize_dummy_item(dummy_key, dummy_value);
+    // dummy_item = initialize_dummy_item(dummy_key, dummy_value);
 
     /* Initialize the uriencode lookup table. */
     uriencode_init();

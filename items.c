@@ -173,7 +173,6 @@ static size_t item_make_header(const uint8_t nkey, const unsigned int flags, con
 }
 
 item *do_item_alloc_pull(const size_t ntotal, const unsigned int id) {
-    printf("EMPIKAAAAAAAAAAAAAAAAAAAAAAAA\n");
     item *it = NULL;
     int i;
     /* If no memory is available, attempt a direct LRU juggle/eviction */
@@ -187,12 +186,8 @@ item *do_item_alloc_pull(const size_t ntotal, const unsigned int id) {
         if (!settings.lru_segmented) {
             lru_pull_tail(id, COLD_LRU, 0, 0, 0, NULL);
         }
-        printf("%u\n", id);
-        printf("%zu\n", ntotal);
         it = slabs_alloc(ntotal, id, 0);
-        printf("EMPIKAAAAAAAAAAAAAAAAAAAAAAAA\n");
         if (it == NULL) {
-            printf("EMPIKAAAAAAAAAAAAAAAAAAAAAAAAnulllllll\n");
             // We send '0' in for "total_bytes" as this routine is always
             // pulling to evict, or forcing HOT -> COLD migration.
             // As of this writing, total_bytes isn't at all used with COLD_LRU.
@@ -257,12 +252,10 @@ item *do_item_alloc(char *key, const size_t nkey, const unsigned int flags,
     if (nbytes < 2)
         return 0;
 
-    printf("EMPIKAAAAAAAA\n");
     size_t ntotal = item_make_header(nkey + 1, flags, nbytes, suffix, &nsuffix);
     if (settings.use_cas) {
         ntotal += sizeof(uint64_t);
     }
-    printf("EMPIKAAAAAAAA\n");
     unsigned int id = slabs_clsid(ntotal);
     unsigned int hdr_id = 0;
     if (id == 0)
@@ -271,7 +264,6 @@ item *do_item_alloc(char *key, const size_t nkey, const unsigned int flags,
     /* This is a large item. Allocate a header object now, lazily allocate
      *  chunks while reading the upload.
      */
-    printf("EMPIKAAAAAAAA\n");
     if (ntotal > settings.slab_chunk_size_max) {
         /* We still link this item into the LRU for the larger slab class, but
          * we're pulling a header from an entirely different slab class. The
@@ -296,7 +288,6 @@ item *do_item_alloc(char *key, const size_t nkey, const unsigned int flags,
             it->it_flags |= ITEM_CHUNKED;
     } else {
         it = do_item_alloc_pull(ntotal, id);
-        printf("EMPIKAAAAAAAA\n");
     }
 
     if (it == NULL) {

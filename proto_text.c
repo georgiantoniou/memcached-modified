@@ -541,6 +541,9 @@ static inline int make_ascii_get_suffix(char *suffix, item *it, bool return_cas,
 
 //*** ADD BY GEORGIA: busy wait instead of searching ***//
 void busy_wait_microseconds(long microseconds) {
+    
+    // printf("empikaaa busy wait microsecondssss %ld\n", microseconds);
+    
     struct timespec start_time, current_time;
     long current_time_microseconds; 
 
@@ -560,6 +563,7 @@ void busy_wait_microseconds(long microseconds) {
 
 /* ntokens is overwritten here... shrug.. */
 static inline void process_get_command(conn *c, token_t *tokens, size_t ntokens, bool return_cas, bool should_touch) {
+   
     char *key;
     size_t nkey;
     item *it;
@@ -567,7 +571,7 @@ static inline void process_get_command(conn *c, token_t *tokens, size_t ntokens,
     int32_t exptime_int = 0;
     
     //*** REMOVE BY GEORGIA: remove search to enable constant search time ***//
-    // rel_time_t exptime = 0;
+    rel_time_t exptime = 0;
     
     bool fail_length = false;
     assert(c != NULL);
@@ -582,13 +586,13 @@ static inline void process_get_command(conn *c, token_t *tokens, size_t ntokens,
         key_token++;
 
         //*** REMOVE BY GEORGIA: initialize response to dummy item ***//        
-        // exptime = realtime(EXPTIME_TO_POSITIVE_TIME(exptime_int));
+        exptime = realtime(EXPTIME_TO_POSITIVE_TIME(exptime_int));
     }
 
     do {
         while(key_token->length != 0) {
             //*** REMOVE BY GEORGIA: remove search to enable constant search time ***//
-            // bool overflow; // not used here.
+            bool overflow; // not used here.
 
             key = key_token->value;
             nkey = key_token->length;
@@ -599,10 +603,10 @@ static inline void process_get_command(conn *c, token_t *tokens, size_t ntokens,
             }
 
             //*** REMOVE BY GEORGIA: remove search to enable constant search time ***//
-            // it = limited_get(key, nkey, c, exptime, should_touch, DO_UPDATE, &overflow);
+            it = limited_get(key, nkey, c, exptime, should_touch, DO_UPDATE, &overflow);
             
             //*** ADD BY GEORGIA: initialize response to dummy item ***//
-            it = dummy_item;
+            // it = dummy_item;
 
             //*** ADD BY GEORGIA: spin sleep for a fixed amount of time ***//
             busy_wait_microseconds(settings.sleep_time);  
@@ -747,6 +751,7 @@ stop:
         resp_add_iov(resp, "END\r\n", 5);
         conn_set_state(c, conn_mwrite);
     }
+    
 }
 
 inline static void process_stats_detail(conn *c, const char *command) {
